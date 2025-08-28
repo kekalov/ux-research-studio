@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, send_file
-from flask_cors import CORS
+# from flask_cors import CORS  # Временно отключаем для Render
 import json
 import os
 import sys
@@ -17,7 +17,7 @@ from config.advanced_scenarios import get_advanced_scenarios, get_enhanced_searc
 from reports.report_generator import ReportGenerator
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)  # Временно отключаем для Render
 
 # Глобальное хранилище активных исследований
 active_research = {}
