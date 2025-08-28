@@ -11,10 +11,10 @@ from datetime import datetime
 # Добавляем корневую директорию в путь
 sys.path.append(str(Path(__file__).parent.parent))
 
-from agent.ux_agent import UXResearchAgent
+# from agent.ux_agent import UXResearchAgent  # Временно отключаем для Render
 from config.settings import load_config
 from config.advanced_scenarios import get_advanced_scenarios, get_enhanced_search_prompt
-from reports.report_generator import ReportGenerator
+# from reports.report_generator import ReportGenerator  # Временно отключаем для Render
 
 app = Flask(__name__)
 # CORS(app)  # Временно отключаем для Render
@@ -48,20 +48,10 @@ class ResearchManager:
     def _run_research(self, scenario_data):
         """Выполнение исследования"""
         try:
-            # Создаем агента
-            config = load_config()
-            
-            # Для Render используем headless режим и дополнительные опции Chrome
-            if os.environ.get('RENDER'):
-                config['browser']['headless'] = True
-                config['browser']['options'] = [
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--remote-debugging-port=9222'
-                ]
-            
-            self.agent = UXResearchAgent(config, headless=True)
+            # Создаем агента (временно отключено для Render)
+            # config = load_config()
+            # self.agent = UXResearchAgent(config, headless=True)
+            print("🤖 AI Agent temporarily disabled for Render deployment")
             
             # Добавляем сообщение о начале
             self.add_message("🤖 AI Agent", "Начинаю исследование...", "info")
