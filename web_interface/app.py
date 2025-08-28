@@ -16,8 +16,13 @@ from agent.ux_agent import UXResearchAgent
 from config.settings import load_config
 from config.advanced_scenarios import get_advanced_scenarios, get_enhanced_search_prompt
 import sys
-sys.path.append(str(Path(__file__).parent.parent / 'reports'))
-from report_generator import ReportGenerator
+try:
+    sys.path.append(str(Path(__file__).parent.parent / 'reports'))
+    from report_generator import ReportGenerator
+    REPORT_GENERATOR_AVAILABLE = True
+except ImportError:
+    print("⚠️ ReportGenerator not available - using basic functionality")
+    REPORT_GENERATOR_AVAILABLE = False
 
 app = Flask(__name__, template_folder='templates')
 # CORS(app)  # Временно отключаем для Render
@@ -33,7 +38,7 @@ class ResearchManager:
         self.status = "idle"
         self.results = {}
         self.messages = []
-        self.report_generator = ReportGenerator()
+        self.report_generator = ReportGenerator() if REPORT_GENERATOR_AVAILABLE else None
         
     def start_research(self, scenario_data):
         """Запуск исследования в отдельном потоке"""
@@ -107,17 +112,20 @@ class ResearchManager:
             print(f"🔍 Конкурентный анализ: {self.results.get('competitive_analysis', {}).keys() if self.results.get('competitive_analysis') else 'None'}")
             
             # Генерируем полный отчет с графиками
-            try:
-                self.add_message("📊 Генерация отчета", "Создаю детальный отчет с графиками...", "info")
-                report_path = self.report_generator.generate_report(
-                    self.results, 
-                    custom_scenario['name'], 
-                    'reports'
-                )
-                self.results['full_report_path'] = report_path
-                self.add_message("📊 Отчет готов", f"Полный отчет сохранен: {report_path}", "success")
-            except Exception as e:
-                self.add_message("⚠️ Ошибка отчета", f"Не удалось создать полный отчет: {str(e)}", "warning")
+            if self.report_generator and REPORT_GENERATOR_AVAILABLE:
+                try:
+                    self.add_message("📊 Генерация отчета", "Создаю детальный отчет с графиками...", "info")
+                    report_path = self.report_generator.generate_report(
+                        self.results, 
+                        custom_scenario['name'], 
+                        'reports'
+                    )
+                    self.results['full_report_path'] = report_path
+                    self.add_message("📊 Отчет готов", f"Полный отчет сохранен: {report_path}", "success")
+                except Exception as e:
+                    self.add_message("⚠️ Ошибка отчета", f"Не удалось создать полный отчет: {str(e)}", "warning")
+            else:
+                self.add_message("📊 Отчет", "Полный отчет недоступен на Render - используйте базовый функционал", "info")
             
             self.add_message("✅ Завершено", "Исследование успешно завершено!", "success")
             self.status = "completed"
