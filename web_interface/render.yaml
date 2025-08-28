@@ -4,6 +4,7 @@ services:
     env: python
     plan: starter
     buildCommand: |
+      cd web_interface
       chmod +x build.sh
       ./build.sh
       pip install -r requirements_web.txt
