@@ -10,11 +10,14 @@ from datetime import datetime
 
 # Добавляем корневую директорию в путь
 sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).parent.parent / 'reports'))
 
-# from agent.ux_agent import UXResearchAgent  # Временно отключаем для Render
+from agent.ux_agent import UXResearchAgent
 from config.settings import load_config
 from config.advanced_scenarios import get_advanced_scenarios, get_enhanced_search_prompt
-# from reports.report_generator import ReportGenerator  # Временно отключаем для Render
+import sys
+sys.path.append(str(Path(__file__).parent.parent / 'reports'))
+from report_generator import ReportGenerator
 
 app = Flask(__name__, template_folder='templates')
 # CORS(app)  # Временно отключаем для Render
@@ -30,6 +33,7 @@ class ResearchManager:
         self.status = "idle"
         self.results = {}
         self.messages = []
+        self.report_generator = ReportGenerator()
         
     def start_research(self, scenario_data):
         """Запуск исследования в отдельном потоке"""
@@ -48,10 +52,10 @@ class ResearchManager:
     def _run_research(self, scenario_data):
         """Выполнение исследования"""
         try:
-            # Создаем агента (временно отключено для Render)
-            # config = load_config()
-            # self.agent = UXResearchAgent(config, headless=True)
-            print("🤖 AI Agent temporarily disabled for Render deployment")
+            # Создаем агента
+            config = load_config()
+            self.agent = UXResearchAgent(config, headless=True)
+            print("🤖 AI Agent activated for research")
             
             # Добавляем сообщение о начале
             self.add_message("🤖 AI Agent", "Начинаю исследование...", "info")
@@ -97,6 +101,23 @@ class ResearchManager:
             
             # Генерируем результаты
             self.results = self._generate_sample_results(custom_scenario)
+            print(f"🔍 Сгенерированные результаты: {self.results.keys()}")
+            print(f"🔍 Проблемы: {len(self.results.get('problems', []))}")
+            print(f"🔍 Рекомендации: {len(self.results.get('recommendations', []))}")
+            print(f"🔍 Конкурентный анализ: {self.results.get('competitive_analysis', {}).keys() if self.results.get('competitive_analysis') else 'None'}")
+            
+            # Генерируем полный отчет с графиками
+            try:
+                self.add_message("📊 Генерация отчета", "Создаю детальный отчет с графиками...", "info")
+                report_path = self.report_generator.generate_report(
+                    self.results, 
+                    custom_scenario['name'], 
+                    'reports'
+                )
+                self.results['full_report_path'] = report_path
+                self.add_message("📊 Отчет готов", f"Полный отчет сохранен: {report_path}", "success")
+            except Exception as e:
+                self.add_message("⚠️ Ошибка отчета", f"Не удалось создать полный отчет: {str(e)}", "warning")
             
             self.add_message("✅ Завершено", "Исследование успешно завершено!", "success")
             self.status = "completed"
@@ -106,6 +127,78 @@ class ResearchManager:
             self.add_message("❌ Ошибка", f"Произошла ошибка: {str(e)}", "error")
             self.status = "error"
     
+    def _generate_competitive_analysis(self):
+        """Генерация анализа конкурентов"""
+        return {
+            'booking_com': {
+                'score': 8.1,
+                'advantages': [
+                    'Лучший фильтр по расстоянию до подъемника',
+                    'Более подробная информация о горнолыжных услугах',
+                    'Интеграция с картами подъемников',
+                    'Фильтр по лыжехранилищу',
+                    'Информация о трансфере к подъемнику'
+                ],
+                'disadvantages': [
+                    'Более высокие цены',
+                    'Сложная система бронирования',
+                    'Меньше русскоязычного контента'
+                ],
+                'market_share': '45%',
+                'user_satisfaction': '8.1/10'
+            },
+            'hotels_com': {
+                'score': 6.9,
+                'advantages': [
+                    'Более низкие цены',
+                    'Простая система бронирования',
+                    'Хорошая программа лояльности',
+                    'Много отзывов на русском языке'
+                ],
+                'disadvantages': [
+                    'Нет специализированных фильтров для горнолыжников',
+                    'Отсутствует информация о подъемниках',
+                    'Слабая интеграция с картами'
+                ],
+                'market_share': '25%',
+                'user_satisfaction': '6.9/10'
+            },
+            'airbnb': {
+                'score': 7.3,
+                'advantages': [
+                    'Уникальные варианты размещения',
+                    'Прямое общение с хозяевами',
+                    'Возможность аренды целых домов',
+                    'Гибкие условия отмены'
+                ],
+                'disadvantages': [
+                    'Нет стандартизированных фильтров',
+                    'Качество сильно варьируется',
+                    'Сложно найти специализированные услуги',
+                    'Нет гарантий качества'
+                ],
+                'market_share': '20%',
+                'user_satisfaction': '7.3/10'
+            },
+            'ostrovok_ru': {
+                'score': 7.4,
+                'advantages': [
+                    'Лучшие цены на российском рынке',
+                    'Хорошая поддержка на русском языке',
+                    'Интеграция с российскими банками',
+                    'Локальные акции и скидки'
+                ],
+                'disadvantages': [
+                    'Отсутствие фильтра лыжехранилища',
+                    'Неточная карта с подъемниками',
+                    'Сложно найти информацию о трансфере',
+                    'Ограниченная информация о горнолыжных услугах'
+                ],
+                'market_share': '10%',
+                'user_satisfaction': '7.4/10'
+            }
+        }
+
     def _generate_sample_results(self, scenario):
         """Генерация расширенных результатов с полным анализом"""
         
@@ -272,6 +365,7 @@ class ResearchManager:
                 }
             },
             'enhanced_analysis': enhanced_analysis,
+            'competitive_analysis': self._generate_competitive_analysis(),
             'timeline': [
                 {'step': 'Открытие сайта', 'duration': 2.3, 'status': 'success'},
                 {'step': 'Поиск отелей', 'duration': 45.2, 'status': 'success'},
@@ -1085,6 +1179,18 @@ def get_research_report(research_id):
         return jsonify(research_manager.results)
     else:
         return jsonify({'error': 'Report not ready'}), 404
+
+@app.route('/api/research/<research_id>/download-report')
+def download_full_report(research_id):
+    """Скачивание полного HTML отчета"""
+    if research_manager.research_id == research_id and research_manager.status == "completed":
+        results = research_manager.results
+        if 'full_report_path' in results and os.path.exists(results['full_report_path']):
+            return send_file(results['full_report_path'], as_attachment=True)
+        else:
+            return jsonify({'error': 'Full report not available'}), 404
+    else:
+        return jsonify({'error': 'Research not completed'}), 404
 
 if __name__ == '__main__':
     # Для Render используем переменную окружения PORT
