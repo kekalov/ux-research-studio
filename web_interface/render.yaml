@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: ux-research-studio
+    env: python
+    plan: starter
+    buildCommand: |
+      chmod +x build.sh
+      ./build.sh
+      pip install -r requirements_web.txt
+    startCommand: |
+      cd web_interface
+      gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: OPENAI_API_KEY
+        sync: false  # Будет установлен вручную в Render dashboard
+      - key: RENDER
+        value: true
+    healthCheckPath: /
+    autoDeploy: true
