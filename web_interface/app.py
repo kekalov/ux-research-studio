@@ -16,7 +16,7 @@ from config.settings import load_config
 from config.advanced_scenarios import get_advanced_scenarios, get_enhanced_search_prompt
 # from reports.report_generator import ReportGenerator  # Временно отключаем для Render
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 # CORS(app)  # Временно отключаем для Render
 
 # Глобальное хранилище активных исследований
@@ -308,7 +308,46 @@ research_manager = ResearchManager()
 @app.route('/')
 def index():
     """Главная страница"""
-    return render_template('index.html')
+    # Временно возвращаем простую HTML страницу для Render
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>🎯 UX Research Studio</title>
+        <meta charset="UTF-8">
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .container { max-width: 800px; margin: 0 auto; text-align: center; }
+            h1 { font-size: 3rem; margin-bottom: 20px; }
+            p { font-size: 1.2rem; margin-bottom: 15px; }
+            .status { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0; }
+            .btn { background: white; color: #667eea; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎯 UX Research Studio</h1>
+            <p>AI Agent Platform для исследования пользовательского опыта</p>
+            
+            <div class="status">
+                <h2>✅ Сервер успешно запущен!</h2>
+                <p>Веб-интерфейс временно недоступен</p>
+                <p>Мы работаем над исправлением проблемы с шаблонами</p>
+            </div>
+            
+            <div>
+                <button class="btn" onclick="alert('Функционал будет доступен в следующем обновлении!')">🚀 Попробовать</button>
+                <button class="btn" onclick="alert('Сервер работает на Render!')">📊 Статус</button>
+            </div>
+            
+            <div style="margin-top: 40px; opacity: 0.8;">
+                <p>🔄 Обновление в процессе...</p>
+                <p>Следите за обновлениями в GitHub</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
 
 @app.route('/api/scenarios')
 def get_scenarios():
