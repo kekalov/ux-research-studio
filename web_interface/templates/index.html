@@ -699,7 +699,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Показ результатов
+        // Показ результатов - ПОЛНОСТЬЮ ПЕРЕПИСАНА
         function showResults(results) {
             console.log('🔍 Полученные результаты:', results);
             console.log('🔍 Тип данных:', typeof results);
@@ -721,47 +721,56 @@
                 return;
             }
             
-            // Метрики
-            const metricsGrid = document.getElementById('metricsGrid');
-            metricsGrid.style.display = 'grid';
+            // ОЧИЩАЕМ секцию перед добавлением нового контента
+            section.innerHTML = `
+                <h2>📊 Результаты исследования</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">Исследование завершено! Получены результаты UX анализа.</p>
+            `;
+            
+            // 1. МЕТРИКИ - принудительно отображаем
             if (results.summary) {
-                metricsGrid.innerHTML = `
-                    <div class="metric-card">
-                        <div class="metric-value">${results.summary.overall_rating || 'N/A'}/10</div>
-                        <div class="metric-label">Общий рейтинг</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${results.summary.matching_hotels || 'N/A'}</div>
-                        <div class="metric-label">Подходящих отелей</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${results.summary.success_rate || 'N/A'}%</div>
-                        <div class="metric-label">Успешность</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${results.summary.total_time || 'N/A'}</div>
-                        <div class="metric-label">Время выполнения</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${results.summary.search_steps || 'N/A'}</div>
-                        <div class="metric-label">Шагов поиска</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">${results.summary.filters_applied || 'N/A'}</div>
-                        <div class="metric-label">Применено фильтров</div>
+                const metricsSection = document.createElement('div');
+                metricsSection.innerHTML = `
+                    <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <div class="metric-value" style="font-size: 2rem; font-weight: bold; margin-bottom: 5px;">${results.summary.overall_rating || 'N/A'}/10</div>
+                            <div class="metric-label" style="font-size: 0.9rem; opacity: 0.9;">Общий рейтинг</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <div class="metric-value" style="font-size: 2rem; font-weight: bold; margin-bottom: 5px;">${results.summary.matching_hotels || 'N/A'}</div>
+                            <div class="metric-label" style="font-size: 0.9rem; opacity: 0.9;">Подходящих отелей</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <div class="metric-value" style="font-size: 2rem; font-weight: bold; margin-bottom: 5px;">${results.summary.success_rate || 'N/A'}%</div>
+                            <div class="metric-label" style="font-size: 0.9rem; opacity: 0.9;">Успешность</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <div class="metric-value" style="font-size: 2rem; font-weight: bold; margin-bottom: 5px;">${results.summary.total_time || 'N/A'}</div>
+                            <div class="metric-label" style="font-size: 0.9rem; opacity: 0.9;">Время выполнения</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <div class="metric-value" style="font-size: 2rem; font-weight: bold; margin-bottom: 5px;">${results.summary.search_steps || 'N/A'}</div>
+                            <div class="metric-label" style="font-size: 0.9rem; opacity: 0.9;">Шагов поиска</div>
+                        </div>
+                        <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <div class="metric-value" style="font-size: 2rem; font-weight: bold; margin-bottom: 5px;">${results.summary.filters_applied || 'N/A'}</div>
+                            <div class="metric-label" style="font-size: 0.9rem; opacity: 0.9;">Применено фильтров</div>
+                        </div>
                     </div>
                 `;
-            } else {
-                metricsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">Метрики недоступны</div>';
+                section.appendChild(metricsSection);
             }
             
-            // Проблемы с приоритетами
-            console.log('🔍 Проблемы:', results.problems);
-            const problemsList = document.getElementById('problemsList');
-            problemsList.style.display = 'block';
+            // 2. ПРОБЛЕМЫ И РЕКОМЕНДАЦИИ - принудительно отображаем
+            const problemsRecommendationsSection = document.createElement('div');
+            problemsRecommendationsSection.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;';
+            
+            // Проблемы
+            let problemsHTML = '<h3>🚨 Проблемы</h3>';
             if (results.problems && results.problems.length > 0) {
-                problemsList.innerHTML = results.problems.map(problem => `
-                    <li>
+                problemsHTML += '<ul class="problems-list" style="list-style: none; padding: 0;">';
+                problemsHTML += results.problems.map(problem => `
+                    <li style="padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 4px solid #667eea; background: #fff3e0;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <strong>${problem.issue || problem.recommendation || 'Проблема не указана'}</strong>
@@ -775,17 +784,17 @@
                         </div>
                     </li>
                 `).join('');
+                problemsHTML += '</ul>';
             } else {
-                problemsList.innerHTML = '<li>Проблемы не выявлены</li>';
+                problemsHTML += '<p style="color: #666;">Проблемы не выявлены</p>';
             }
             
-            // Рекомендации с приоритетами
-            console.log('🔍 Рекомендации:', results.recommendations);
-            const recommendationsList = document.getElementById('recommendationsList');
-            recommendationsList.style.display = 'block';
+            // Рекомендации
+            let recommendationsHTML = '<h3>💡 Рекомендации</h3>';
             if (results.recommendations && results.recommendations.length > 0) {
-                recommendationsList.innerHTML = results.recommendations.map(rec => `
-                    <li>
+                recommendationsHTML += '<ul class="recommendations-list" style="list-style: none; padding: 0;">';
+                recommendationsHTML += results.recommendations.map(rec => `
+                    <li style="padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 4px solid #667eea; background: #e8f5e8;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <strong>${rec.recommendation || 'Рекомендация не указана'}</strong>
@@ -799,82 +808,156 @@
                         </div>
                     </li>
                 `).join('');
+                recommendationsHTML += '</ul>';
             } else {
-                recommendationsList.innerHTML = '<li>Рекомендации не указаны</li>';
+                recommendationsHTML += '<p style="color: #666;">Рекомендации не указаны</p>';
             }
             
-            // Расширенные персонажи
-            const personasGrid = document.getElementById('personasGrid');
-            personasGrid.style.display = 'grid';
+            problemsRecommendationsSection.innerHTML = `
+                <div>${problemsHTML}</div>
+                <div>${recommendationsHTML}</div>
+            `;
+            section.appendChild(problemsRecommendationsSection);
+            
+            // 3. ПЕРСОНАЛИ - принудительно отображаем
             if (results.personas_feedback) {
-                personasGrid.innerHTML = Object.entries(results.personas_feedback).map(([key, data]) => `
-                    <div class="persona-card">
-                        <div class="persona-rating">${data.rating || 'N/A'}/10</div>
-                        <div><strong>${key.replace('_', ' ').toUpperCase()}</strong></div>
-                        <div style="margin-top: 5px; font-size: 0.9rem; color: #666;">${data.comment || 'Комментарий не указан'}</div>
-                        ${data.pain_points ? `
-                            <div style="margin-top: 10px;">
-                                <strong style="color: #ff6b6b;">Болевые точки:</strong>
-                                <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.8rem;">
-                                    ${data.pain_points.map(point => `<li>${point}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${data.suggestions ? `
-                            <div style="margin-top: 10px;">
-                                <strong style="color: #6bcf7f;">Предложения:</strong>
-                                <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.8rem;">
-                                    ${data.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
+                const personasSection = document.createElement('div');
+                personasSection.innerHTML = `
+                    <div style="margin-bottom: 30px;">
+                        <h3>👥 Фидбек от персонажей</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
+                            ${Object.entries(results.personas_feedback).map(([key, data]) => `
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px solid #e1e5e9;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">${data.rating || 'N/A'}/10</div>
+                                    <div style="font-weight: bold; margin-bottom: 5px;">${key.replace('_', ' ').toUpperCase()}</div>
+                                    <div style="margin-top: 5px; font-size: 0.9rem; color: #666;">${data.comment || 'Комментарий не указан'}</div>
+                                    ${data.pain_points ? `
+                                        <div style="margin-top: 10px;">
+                                            <strong style="color: #ff6b6b;">Болевые точки:</strong>
+                                            <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.8rem;">
+                                                ${data.pain_points.map(point => `<li>${point}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                    ${data.suggestions ? `
+                                        <div style="margin-top: 10px;">
+                                            <strong style="color: #6bcf7f;">Предложения:</strong>
+                                            <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.8rem;">
+                                                ${data.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
-                `).join('');
-            } else {
-                personasGrid.innerHTML = '<div class="persona-card">Фидбек от персонажей не доступен</div>';
+                `;
+                section.appendChild(personasSection);
             }
             
-            // Добавляем расширенный анализ
+            // 4. КОНКУРЕНТНЫЙ АНАЛИЗ - принудительно отображаем
+            if (results.competitive_analysis) {
+                const competitiveSection = document.createElement('div');
+                competitiveSection.innerHTML = `
+                    <div style="margin-bottom: 30px;">
+                        <h3>🏆 Сравнение с конкурентами</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
+                            ${Object.entries(results.competitive_analysis).map(([competitor, data]) => `
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">${data.score}/10</div>
+                                    <div style="font-weight: bold; margin-bottom: 10px; color: #333;">${competitor.replace('_', ' ').toUpperCase()}</div>
+                                    
+                                    <div style="margin: 10px 0;">
+                                        <h4 style="color: #6bcf7f; margin-bottom: 5px;">✅ Преимущества:</h4>
+                                        <ul style="margin: 5px 0; padding-left: 20px;">
+                                            ${data.advantages.map(adv => `<li>${adv}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                    
+                                    <div style="margin: 10px 0;">
+                                        <h4 style="color: #ff6b6b; margin-bottom: 5px;">❌ Недостатки:</h4>
+                                        <ul style="margin: 5px 0; padding-left: 20px;">
+                                            ${data.disadvantages.map(dis => `<li>${dis}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                    
+                                    <div style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                                        <strong>Доля рынка:</strong> ${data.market_share} | 
+                                        <strong>Удовлетворенность:</strong> ${data.user_satisfaction}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                section.appendChild(competitiveSection);
+            }
+            
+            // 5. ВРЕМЕННАЯ ШКАЛА - принудительно отображаем
+            if (results.timeline) {
+                const timelineSection = document.createElement('div');
+                timelineSection.innerHTML = `
+                    <div style="margin-bottom: 30px;">
+                        <h3>⏱️ Временная шкала выполнения</h3>
+                        <div style="margin-top: 15px;">
+                            ${results.timeline.map((step, index) => `
+                                <div style="display: flex; align-items: center; margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: ${step.status === 'success' ? '#6bcf7f' : step.status === 'partial' ? '#ffd93d' : '#ff6b6b'}; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;">
+                                        ${index + 1}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${step.step}</div>
+                                        <div style="font-size: 0.9rem; color: #666;">Время: ${step.duration} сек</div>
+                                    </div>
+                                    <div style="background: ${step.status === 'success' ? '#6bcf7f' : step.status === 'partial' ? '#ffd93d' : '#ff6b6b'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                                        ${step.status === 'success' ? 'Успешно' : step.status === 'partial' ? 'Частично' : 'Ошибка'}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                section.appendChild(timelineSection);
+            }
+            
+            // 6. ДЕТАЛИ СЦЕНАРИЯ - принудительно отображаем
+            if (results.scenario) {
+                const scenarioSection = document.createElement('div');
+                scenarioSection.innerHTML = `
+                    <div style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea;">
+                        <h3>🎯 Детали сценария</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div><strong>Направление:</strong> ${results.scenario.destination || 'Не указано'}</div>
+                            <div><strong>Заезд:</strong> ${results.scenario.check_in || 'Не указано'}</div>
+                            <div><strong>Выезд:</strong> ${results.scenario.check_out || 'Не указано'}</div>
+                            <div><strong>Гости:</strong> ${results.scenario.guests || 'Не указано'}</div>
+                            <div><strong>Комнаты:</strong> ${results.scenario.rooms || 'Не указано'}</div>
+                            <div><strong>Звезды:</strong> ${results.scenario.requirements?.stars || 'Не указано'}</div>
+                            <div><strong>Цена до:</strong> ${results.scenario.requirements?.price_limit || 'Не указано'}</div>
+                            <div><strong>Хранение лыж:</strong> ${results.scenario.requirements?.ski_storage ? 'Да' : 'Нет'}</div>
+                            <div><strong>Трансфер к подъемнику:</strong> ${results.scenario.requirements?.transfer_to_lift ? 'Да' : 'Нет'}</div>
+                            <div><strong>Отмена:</strong> ${results.scenario.requirements?.cancellation || 'Не указано'}</div>
+                        </div>
+                    </div>
+                `;
+                section.appendChild(scenarioSection);
+            }
+            
+            // 7. КНОПКА СКАЧИВАНИЯ - принудительно отображаем
+            const downloadSection = document.createElement('div');
+            downloadSection.style.cssText = 'text-align: center; margin-top: 30px;';
+            downloadSection.innerHTML = `
+                <h3>📊 Полный отчет</h3>
+                <p style="margin-bottom: 20px; color: #666;">Для получения полного отчета с графиками и детальным анализом, скачайте JSON файл:</p>
+                <button onclick="downloadJSONReport(${JSON.stringify(results).replace(/"/g, '&quot;')})" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem;">
+                    📥 Скачать JSON отчет
+                </button>
+            `;
+            section.appendChild(downloadSection);
+            
+            // 8. РАСШИРЕННЫЙ АНАЛИЗ - принудительно отображаем
             if (results.enhanced_analysis) {
                 addEnhancedAnalysis(results.enhanced_analysis);
-            }
-            
-            // Добавляем временную шкалу
-            if (results.timeline) {
-                addTimeline(results.timeline);
-            }
-            
-            // Добавляем детали сценария
-            if (results.scenario) {
-                addScenarioDetails(results.scenario);
-            }
-
-            // Добавляем конкурентный анализ
-            console.log('🔍 Конкурентный анализ:', results.competitive_analysis);
-            if (results.competitive_analysis) {
-                addCompetitiveAnalysis(results.competitive_analysis);
-            } else {
-                // Показываем заглушку для конкурентного анализа
-                const competitiveGrid = document.getElementById('competitiveGrid');
-                if (competitiveGrid) {
-                    competitiveGrid.style.display = 'grid';
-                    competitiveGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">Конкурентный анализ недоступен</div>';
-                }
-            }
-
-            // Показываем кнопку скачивания отчета
-            console.log('🔍 Путь к полному отчету:', results.full_report_path);
-            const downloadBtn = document.getElementById('downloadReportBtn');
-            if (downloadBtn) {
-                if (results.full_report_path) {
-                    downloadBtn.style.display = 'inline-block';
-                    downloadBtn.onclick = () => downloadFullReport();
-                } else {
-                    // Показываем кнопку для скачивания JSON данных
-                    downloadBtn.style.display = 'inline-block';
-                    downloadBtn.textContent = '📥 Скачать JSON отчет';
-                    downloadBtn.onclick = () => downloadJSONReport(results);
-                }
             }
         }
         
@@ -1082,7 +1165,18 @@
 
         // Скачивание JSON отчета
         function downloadJSONReport(results) {
-            const dataStr = JSON.stringify(results, null, 2);
+            // Если results передается как строка, парсим её
+            let dataToDownload = results;
+            if (typeof results === 'string') {
+                try {
+                    dataToDownload = JSON.parse(results);
+                } catch (e) {
+                    console.error('Ошибка парсинга JSON:', e);
+                    dataToDownload = { error: 'Не удалось загрузить данные' };
+                }
+            }
+            
+            const dataStr = JSON.stringify(dataToDownload, null, 2);
             const dataBlob = new Blob([dataStr], {type: 'application/json'});
             const url = window.URL.createObjectURL(dataBlob);
             const a = document.createElement('a');
